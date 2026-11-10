@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict')
 const { test } = require('node:test')
-const { countdown, decodeDisplay, elapsedMinutes, loadCountdown, startPreset } = require('../src/protocol')
+const { countdown, decodeDisplay, elapsedMinutes, loadCountdown, loadPreset, startPreset } = require('../src/protocol')
 
 test('encodes custom durations using four M2 or M3 digits', () => {
   assert.deepEqual(countdown('30'), [70, 77, 22, 22, 94, 22, 25])
@@ -19,6 +19,13 @@ test('rejects invalid and unrepresentable durations before sending commands', ()
 
 test('loads a countdown without starting it', () => {
   assert.deepEqual(loadCountdown('10'), [70, 77, 22, 22, 12, 22])
+})
+
+test('stages a saved countdown with one remote keypress', () => {
+  assert.deepEqual(loadPreset('m1'), [7])
+  assert.deepEqual(loadPreset('m2'), [77])
+  assert.deepEqual(loadPreset('m3'), [26])
+  assert.throws(() => loadPreset('constructor'), /Choose a timer preset/)
 })
 
 test('shows elapsed minutes with the first two digit positions blank through 99', () => {

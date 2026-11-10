@@ -17,6 +17,7 @@ Companion must be able to reach the clock on TCP port 81. The clock's browser PI
 | --- | --- |
 | Start countdown | Enter whole seconds, `M:SS`, or `H:MM:SS`. For example, `30`, `5:00`, or `1:30:00`. |
 | Load countdown without starting | Set a duration in advance, then use **Pause / resume timer** to start it at the cue. |
+| Load saved countdown preset without starting | Select M1, M2, or M3 with a single remote keypress. Use **Pause / resume timer** to start it at the cue. |
 | Start saved countdown preset | Start M1 (seconds), M2 (minutes), or M3 (hours) using the clock's stored settings. |
 | Start stopwatch (M4) | Start the clock's count-up timer from zero. |
 | Show elapsed minutes | Display a supplied number of minutes. Through 99 minutes the left two digits are blank. At 100 minutes and above the display uses hours and minutes. |
@@ -31,7 +32,7 @@ Hardware validation covers a WS-604S running firmware V2.0.1 (Aug 22, 2025). Fir
 
 ## Synchronize with Companion or OBS
 
-- To sync a short countdown with another Companion timer, load its duration before the cue and use **Pause / resume timer** when the other timer starts. The clock returns to wall time when a single-run countdown finishes.
+- To sync a short countdown with another Companion timer, load it before the cue and use **Pause / resume timer** when the other timer starts. Use a saved countdown preset to skip the intermediate digit changes and key tones from entering a custom duration. The clock returns to wall time when a single-run countdown finishes.
 - For elapsed recording time, trigger **Show elapsed minutes** on changes to the OBS recording minute. For a connection labeled `OBS`, use `floor(timestampToSeconds($(OBS:recording_timecode)) / 60)` as the minutes expression. Filter the trigger to the recording state and the desired minimum elapsed time. On the OBS **Stopped** state, run **Cancel timer and show time**.
 - Enable **Blink silently** in the elapsed-minutes action for a one-second blink cycle. Start with the clock's key and countdown sounds enabled. The module toggles the clock's mute when blinking begins, keeps it muted through minute updates, and restores sound when the display is cleared or a countdown takes over. Use a single controller for silent blinking. The Remote Console provides a mute toggle with no readback. After a power loss or abrupt shutdown during a blink, check the clock's mute setting before the next run.
 

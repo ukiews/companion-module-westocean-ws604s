@@ -5,9 +5,13 @@ const TOGGLE_DISPLAY = 69
 const PRESET = { m1: 7, m2: 77, m3: 26, m4: 23 }
 const DIGITS = [22, 12, 24, 94, 8, 28, 90, 66, 82, 74]
 
-function startPreset(preset) {
+function loadPreset(preset) {
   if (!Object.hasOwn(PRESET, preset)) throw new Error('Choose a timer preset')
-  return [BACK, PRESET[preset], PLAY_PAUSE]
+  return [PRESET[preset]]
+}
+
+function startPreset(preset) {
+  return [BACK, ...loadPreset(preset), PLAY_PAUSE]
 }
 
 function timerDigits(units) {
@@ -56,4 +60,4 @@ function decodeDisplay(data) {
   return data.replaceAll('&nbsp;', ' ').trim()
 }
 
-module.exports = { BACK, PLAY_PAUSE, MUTE, TOGGLE_DISPLAY, countdown, decodeDisplay, elapsedMinutes, loadCountdown, startPreset }
+module.exports = { BACK, PLAY_PAUSE, MUTE, TOGGLE_DISPLAY, countdown, decodeDisplay, elapsedMinutes, loadCountdown, loadPreset, startPreset }

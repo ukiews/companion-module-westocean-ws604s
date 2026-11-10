@@ -1,10 +1,18 @@
 const { InstanceBase, InstanceStatus, Regex, combineRgb } = require('@companion-module/base')
 const { ClockClient } = require('./client')
-const { BACK, PLAY_PAUSE, countdown, elapsedMinutes, loadCountdown, startPreset } = require('./protocol')
+const { BACK, PLAY_PAUSE, countdown, elapsedMinutes, loadCountdown, loadPreset, startPreset } = require('./protocol')
 
 const hostname = new RegExp(Regex.HOSTNAME.slice(1, -1))
 const durationOption = () => ({
   type: 'textinput', id: 'duration', label: 'Duration (seconds, M:SS, or H:MM:SS)', default: '5:00',
+})
+const presetOption = () => ({
+  type: 'dropdown', id: 'preset', label: 'Preset', default: 'm2',
+  choices: [
+    { id: 'm1', label: 'M1 · Seconds' },
+    { id: 'm2', label: 'M2 · Minutes' },
+    { id: 'm3', label: 'M3 · Hours' },
+  ],
 })
 
 class WS604SInstance extends InstanceBase {
@@ -27,6 +35,11 @@ class WS604SInstance extends InstanceBase {
         options: [durationOption()],
         callback: ({ options }) => this.run(() => loadCountdown(options.duration)),
       },
+      load_preset: {
+        name: 'Load saved countdown preset without starting',
+        options: [presetOption()],
+        callback: ({ options }) => this.run(() => loadPreset(options.preset)),
+      },
       show_elapsed_minutes: {
         name: 'Show elapsed minutes',
         options: [
@@ -37,14 +50,7 @@ class WS604SInstance extends InstanceBase {
       },
       start_preset: {
         name: 'Start saved countdown preset',
-        options: [{
-          type: 'dropdown', id: 'preset', label: 'Preset', default: 'm2',
-          choices: [
-            { id: 'm1', label: 'M1 · Seconds' },
-            { id: 'm2', label: 'M2 · Minutes' },
-            { id: 'm3', label: 'M3 · Hours' },
-          ],
-        }],
+        options: [presetOption()],
         callback: ({ options }) => this.run(() => startPreset(options.preset)),
       },
       stopwatch: {
