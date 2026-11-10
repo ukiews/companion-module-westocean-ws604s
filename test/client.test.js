@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict')
 const { EventEmitter, once } = require('node:events')
 const { test } = require('node:test')
+const { setTimeout: delay } = require('node:timers/promises')
 const { WebSocketServer } = require('ws')
 const { ClockClient } = require('../src/client')
 
@@ -12,8 +13,8 @@ async function start(t) {
     status: (status) => events.emit(status),
     display: (display) => events.emit('display', display),
   })
-  t.after(() => {
-    client.close()
+  t.after(async () => {
+    await client.close()
     for (const socket of server.clients) socket.terminate()
     server.close()
   })
@@ -43,4 +44,23 @@ test('aborts pending commands if the socket closes mid-action', { timeout: 5000 
   await failed
   assert.deepEqual((await actions).map(({ status }) => status), ['rejected', 'rejected'])
   await assert.rejects(client.send([25]), /disconnected/)
+})
+
+test('keeps sound muted across blink updates and restores it before a countdown', { timeout: 7000 }, async (t) => {
+  const { client, socket } = await start(t)
+  const received = []
+  socket.on('message', (data) => received.push(data.toString()))
+
+  await client.send([70, 26, 8, 22], { blink: true })
+  const [toggle] = await once(socket, 'message')
+  assert.equal(toggle.toString(), '#69')
+  await client.send([70, 26, 8, 12], { blink: true })
+  await client.send([70, 77, 25])
+  await delay(600)
+
+  assert.deepEqual(received, [
+    '#71', '#70', '#26', '#8', '#22', '#69',
+    '#70', '#26', '#8', '#12',
+    '#70', '#71', '#77', '#25',
+  ])
 })

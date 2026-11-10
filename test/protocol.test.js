@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict')
 const { test } = require('node:test')
-const { countdown, decodeDisplay, startPreset } = require('../src/protocol')
+const { countdown, decodeDisplay, elapsedMinutes, loadCountdown, startPreset } = require('../src/protocol')
 
 test('encodes custom durations using four M2 or M3 digits', () => {
   assert.deepEqual(countdown('30'), [70, 77, 22, 22, 94, 22, 25])
@@ -15,6 +15,17 @@ test('rejects invalid and unrepresentable durations before sending commands', ()
     assert.throws(() => countdown(value), /Enter whole seconds|Countdown must be between/)
   }
   assert.throws(() => countdown('1:40:01'), /must use whole minutes/)
+})
+
+test('loads a countdown without starting it', () => {
+  assert.deepEqual(loadCountdown('10'), [70, 77, 22, 22, 12, 22])
+})
+
+test('shows elapsed minutes with the first two digit positions blank through 99', () => {
+  assert.deepEqual(elapsedMinutes(40), [70, 26, 8, 22])
+  assert.deepEqual(elapsedMinutes(41), [70, 26, 8, 12])
+  assert.deepEqual(elapsedMinutes(100), [70, 26, 22, 12, 8, 22])
+  assert.throws(() => elapsedMinutes(40.5), /whole number/)
 })
 
 test('selects a saved preset and starts it from the clock display', () => {

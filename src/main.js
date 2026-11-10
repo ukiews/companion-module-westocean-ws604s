@@ -1,8 +1,11 @@
 const { InstanceBase, InstanceStatus, Regex, combineRgb } = require('@companion-module/base')
 const { ClockClient } = require('./client')
-const { BACK, PLAY_PAUSE, countdown, startPreset } = require('./protocol')
+const { BACK, PLAY_PAUSE, countdown, elapsedMinutes, loadCountdown, startPreset } = require('./protocol')
 
 const hostname = new RegExp(Regex.HOSTNAME.slice(1, -1))
+const durationOption = () => ({
+  type: 'textinput', id: 'duration', label: 'Duration (seconds, M:SS, or H:MM:SS)', default: '5:00',
+})
 
 class WS604SInstance extends InstanceBase {
   getConfigFields() {
@@ -16,8 +19,21 @@ class WS604SInstance extends InstanceBase {
     this.setActionDefinitions({
       countdown: {
         name: 'Start countdown',
-        options: [{ type: 'textinput', id: 'duration', label: 'Duration (seconds, M:SS, or H:MM:SS)', default: '5:00' }],
+        options: [durationOption()],
         callback: ({ options }) => this.run(() => countdown(options.duration)),
+      },
+      load_countdown: {
+        name: 'Load countdown without starting',
+        options: [durationOption()],
+        callback: ({ options }) => this.run(() => loadCountdown(options.duration)),
+      },
+      show_elapsed_minutes: {
+        name: 'Show elapsed minutes',
+        options: [
+          { type: 'number', id: 'minutes', label: 'Elapsed minutes', default: 40, min: 0, max: 5999, step: 1 },
+          { type: 'checkbox', id: 'blink', label: 'Blink silently (clock must start with sound enabled)', default: false },
+        ],
+        callback: ({ options }) => this.run(() => elapsedMinutes(options.minutes), { blink: options.blink === true }),
       },
       start_preset: {
         name: 'Start saved countdown preset',
@@ -52,7 +68,7 @@ class WS604SInstance extends InstanceBase {
   }
 
   async configUpdated(config) {
-    this.client?.close()
+    await this.client?.close()
     this.client = undefined
     this.setVariableValues({ display: '' })
     const host = String(config.host ?? '').trim()
@@ -74,15 +90,15 @@ class WS604SInstance extends InstanceBase {
   }
 
   async destroy() {
-    this.client?.close()
+    await this.client?.close()
     this.client = undefined
   }
 
-  async run(buildCommands) {
+  async run(buildCommands, options) {
     try {
       const commands = buildCommands()
       if (!this.client) throw new Error('Configure the clock address first')
-      await this.client.send(commands)
+      await this.client.send(commands, options)
     } catch (error) {
       this.log('warn', error.message)
     }
