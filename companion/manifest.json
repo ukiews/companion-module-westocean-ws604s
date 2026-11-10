@@ -1,0 +1,23 @@
+{
+  "$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
+  "type": "connection",
+  "id": "westocean-ws604s",
+  "name": "West Ocean WS-604S",
+  "shortname": "WS-604S",
+  "description": "Start countdowns, control timers, and mirror the display of the WS-604S clock",
+  "version": "0.0.0",
+  "license": "MIT",
+  "repository": "https://github.com/ukiews/companion-module-westocean-ws604s",
+  "bugs": "https://github.com/ukiews/companion-module-westocean-ws604s/issues",
+  "maintainers": [{ "name": "ukiews" }],
+  "runtime": {
+    "type": "node22",
+    "api": "nodejs-ipc",
+    "apiVersion": "0.0.0",
+    "entrypoint": "../src/main.js"
+  },
+  "legacyIds": [],
+  "manufacturer": "West Ocean",
+  "products": ["WS-604S"],
+  "keywords": ["countdown", "clock", "timer", "stopwatch", "SIBO"]
+}
